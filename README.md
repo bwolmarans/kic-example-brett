@@ -28,38 +28,72 @@ minikube addons configure metallb
     ▪ Using image quay.io/metallb/controller:v0.9.6
 ✅  metallb was successfully configured
 
-k expose deployment nginx-deployment --type LoadBalancer --port 80 --target-port 80
-service/nginx-deployment exposed
-# this requires uncommenting the nodeport part of NGINX deplyoment yaml
-
+```
+### Now a simple NGINX service on NodePort
+k create ns nginx
+k apply -f nginx-nodeport-deployment-and-service.yaml
 k get svc -A
-NAMESPACE     NAME               TYPE           CLUSTER-IP      EXTERNAL-IP      PORT(S)                  AGE
-default       kubernetes         ClusterIP      10.96.0.1       <none>           443/TCP                  102m
-default       nginx-deployment   LoadBalancer   10.104.218.54   192.168.49.100   80:30864/TCP             4s
-kube-system   kube-dns           ClusterIP      10.96.0.10      <none>           53/UDP,53/TCP,9153/TCP   102m
+NAMESPACE     NAME         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                  AGE
+default       kubernetes   ClusterIP   10.96.0.1       <none>        443/TCP                  5d17h
+kube-system   kube-dns     ClusterIP   10.96.0.10      <none>        53/UDP,53/TCP,9153/TCP   5d17h
+nginx         nginx        NodePort    10.97.204.222   <none>        8080:31572/TCP           72s
 
+k get nodes -o wide
+NAME       STATUS   ROLES           AGE     VERSION   INTERNAL-IP    EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION       CONTAINER-RUNTIME
+minikube   Ready    control-plane   5d17h   v1.34.0   192.168.49.2   <none>        Ubuntu 22.04.5 LTS   5.15.0-164-generic   docker://28.4.0
 
-curl 192.168.49.100
+curl 192.168.49.2:31572
 <!DOCTYPE html>
 <html>
 <head>
 <title>Welcome to nginx!</title>
+<style>
+...
+# cleanup
+k delete ns nginx
+```
+### Now the same NGINX deployment only, wihtout any service, instead we will use MetalLB
+```
+k create ns nginx
+
+k apply -f nginx-deployment.yaml 
+deployment.apps/nginx created
+
+k expose deployment nginx --type LoadBalancer --port 8888 --target-port 80 -n nginx
+service/nginx exposed
+
+k get svc -A
+NAMESPACE     NAME         TYPE           CLUSTER-IP       EXTERNAL-IP      PORT(S)                  AGE
+default       kubernetes   ClusterIP      10.96.0.1        <none>           443/TCP                  5d17h
+kube-system   kube-dns     ClusterIP      10.96.0.10       <none>           53/UDP,53/TCP,9153/TCP   5d17h
+nginx         nginx        LoadBalancer   10.103.120.235   192.168.49.100   8888:31720/TCP           9s
+
+curl 192.168.49.100:8888
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+...
+# cleanup 
+k delete ns nginx
 ```
 ## Now add KIC (using "from GUI" instructions)
 When we do this, it will actually create another LoadBalancer service on 192.168.49.101, in my examples below, it uses 192.168.49.100 because I did not actually do the MetalLB method before capturing that output.
 
 ```
 k create ns kong
+kubectl create secret tls konnect-client-tls -n kong --cert=tls.crt --key=tls.key
 helm repo add kong https://charts.konghq.com
 helm repo update
-helm install kong kong/ingress -n kong --values kic-to-konnect-ingresscontroller-and-gateway.yaml
+helm install kong kong/ingress -n kong --values kic-to-konnect-ingresscontroller-and-gw-helm-chart.yaml
 ```
 ### Now add the echo and nginx deployments and services
 ```
 k create ns echo
-k apply -f echo-deployment-and-service 
-k creat ns nginx
-k apply -f nginx-deployment-and-service
+k apply -f echo-deployment-and-service.yaml
+k create ns nginx
+k apply -f nginx-deployment-and-service.yaml
 ```
 ### Now add the respective ingresses and check the services exist
 ```
@@ -96,33 +130,16 @@ curl 192.168.49.100/nginx
 <html>
 <head>
 <title>Welcome to nginx!</title>
-<style>
-html { color-scheme: light dark; }
-body { width: 35em; margin: 0 auto;
-font-family: Tahoma, Verdana, Arial, sans-serif; }
-</style>
-</head>
-<body>
-<h1>Welcome to nginx!</h1>
-<p>If you see this page, the nginx web server is successfully installed and
-working. Further configuration is required.</p>
-
-<p>For online documentation and support please refer to
-<a href="http://nginx.org/">nginx.org</a>.<br/>
-Commercial support is available at
-<a href="http://nginx.com/">nginx.com</a>.</p>
-
-<p><em>Thank you for using nginx.</em></p>
-</body>
-</html>
- 
+... 
 ```
 ## Rate Limit Plugin
 ```
 k apply -f create-rate-limit-plugin.yaml 
+
 kongplugin.configuration.konghq.com/rate-limit-5-min created
 
-k annotate -n kong service echo konghq.com/plugins=rate-limit-5-min
+# note you must annote it using the ns of the service, so here it is scoped to ns echo
+k annotate -n echo service echo konghq.com/plugins=rate-limit-5-min
 service/echo annotated
 
 for i in {1..10}; do curl 192.168.49.100/echo; done;
