@@ -1,4 +1,5 @@
 # follow the "from GUI" instructions, which should result in copying this file from the GUUI, and using this file:
+# helm install kong kong/ingress -n kong --values ./values.yaml
 controller:
   ingressController:
     image:
