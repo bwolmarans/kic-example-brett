@@ -30,6 +30,7 @@ minikube addons configure metallb
 
 ```
 ### Now a simple NGINX service on NodePort
+```
 k create ns nginx
 k apply -f nginx-nodeport-deployment-and-service.yaml
 k get svc -A
@@ -52,7 +53,7 @@ curl 192.168.49.2:31572
 # cleanup
 k delete ns nginx
 ```
-### Now the same NGINX deployment only, wihtout any service, instead we will use MetalLB
+### Now the same NGINX deployment only, without any nodeport service, instead we will use MetalLB
 ```
 k create ns nginx
 
