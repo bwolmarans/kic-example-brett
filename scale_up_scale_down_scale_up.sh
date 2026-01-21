@@ -41,7 +41,7 @@ echo "********************************************"
 echo "Checking services"
 echo "********************************************"
 sleep 3
-kubectl get svc -n webexample
+kubectl get svc -n default
 sleep 3
 echo "********************************************"
 echo "Running our \"controller\" to query the K8s API, find the services, and update the external Kong Gw to match the scaling."
