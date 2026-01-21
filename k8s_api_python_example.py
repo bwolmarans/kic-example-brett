@@ -9,19 +9,21 @@ def main():
 
     # Initialize the CoreV1Api client
     v1 = client.CoreV1Api()
+    
+    namespace = "default"
 
-    print("Listing pods with their IPs across all namespaces:")
-    # Call the list_pod_for_all_namespaces method
-    ret = v1.list_pod_for_all_namespaces(watch=False)
+    print(f"Listing pods in namespace '{namespace}':")
+    # Call the list_namespaced_pod method
+    ret = v1.list_namespaced_pod(namespace=namespace)
 
     print("IP\tNAMESPACE\tNAME")
     for i in ret.items:
         print("%s\t%s\t%s" % (i.status.pod_ip, i.metadata.namespace, i.metadata.name))
 
     print("\n" + "="*50)
-    print("NodePort Ports:")
-    # List all services and filter for NodePort type
-    services = v1.list_service_for_all_namespaces(watch=False)
+    print(f"NodePort Ports in namespace '{namespace}':")
+    # List services in the specific namespace and filter for NodePort type
+    services = v1.list_namespaced_service(namespace=namespace)
     nodeports = []
     for service in services.items:
         if service.spec.type == "NodePort":
