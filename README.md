@@ -2,7 +2,7 @@
 
 This is an example of using the Kong Ingress Controller to two different services, both on the same port.
 The first service is echo, the second service is nginx, say as a simple web server.
-Each service is in it's own namespace.
+Each service is in it's own namespace.  This also is part of onboarding.
 
 ## This is in Minikube and we use Metallb
 
