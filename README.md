@@ -116,8 +116,20 @@ When we do this, it will actually create another LoadBalancer service on 192.168
 ```
 # set env vars for your KONNECT cert and key TLS_CERT and TLS_KEY 
 k create ns kong
-# first export your Konnect cert and key to TLS_CERT and TLS_KEY env vars 
-kubectl create secret tls konnect-client-tls -n kong --cert=<(echo "$TLS_CERT")   --key=<(echo "$TLS_KEY")
+# first export your Konnect cert and key to TLS_CERT and TLS_KEY env vars
+# you must enclose these in double quotes, must use multi-line do not concat the line, do not put backslashes at the end of lines or it does not work
+# example: 
+# export TLS_CERT="---BEGIN CERT---
+# blahblahblah
+# blahblahblah
+# blahblahblah
+# ---END CERT---"
+# export TLS_KEY="---BEGIN KEY---
+# blahblahblah
+# blahblahblah
+# blahblahblah
+# ---END KEY---"
+kubectl create secret tls konnect-client-tls -n kong --cert=<(echo "$TLS_CERT") --key=<(echo "$TLS_KEY")
 helm repo add kong https://charts.konghq.com
 helm repo update
 # now edit kic-to-konnect-ingresscontroller-and-gw-helm-chart.yaml and put in your control plane id, and a couple of other things. These are best found in the Konnect GUI itself by going to install KIC and selecting the Helm method)
