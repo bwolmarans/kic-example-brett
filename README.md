@@ -33,7 +33,8 @@ minikube addons configure metallb
 ```
 ## Now with K3D
 ```
-# install metallb
+# install k3d and test
+# install metallb generically
 kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.15.3/config/manifests/metallb-native.yaml
 k3d cluster create cluster1   --k3s-arg "--disable=servicelb@server:0"   --k3s-arg "--disable=traefik@server:0"
 docker network inspect k3d-cluster1 | grep Subnet
