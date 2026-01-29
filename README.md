@@ -42,7 +42,6 @@ k create ns nginx
 k apply -f nginx-nodeport-deployment-and-service.yaml
 k get svc -A
 ```
-```
 NAMESPACE     NAME         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                  AGE
 default       kubernetes   ClusterIP   10.96.0.1       <none>        443/TCP                  5d17h
 kube-system   kube-dns     ClusterIP   10.96.0.10      <none>        53/UDP,53/TCP,9153/TCP   5d17h
@@ -61,6 +60,7 @@ curl 192.168.49.2:31572
 <title>Welcome to nginx!</title>
 <style>
 ...
+```
 # cleanup
 k delete ns nginx
 ```
