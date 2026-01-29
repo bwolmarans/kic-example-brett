@@ -132,7 +132,8 @@ k create ns kong
 kubectl create secret tls konnect-client-tls -n kong --cert=<(echo "$TLS_CERT") --key=<(echo "$TLS_KEY")
 helm repo add kong https://charts.konghq.com
 helm repo update
-# now edit kic-to-konnect-ingresscontroller-and-gw-helm-chart.yaml and put in your control plane id, and a couple of other things. These are best found in the Konnect GUI itself by going to install KIC and selecting the Helm method)
+# Copy the helm chart from Konnect GUI itself by going to your KIC Gateway, clicking connect or dataplane noes, and selecting the Helm method
+# The helm chart below is an example only. 
 helm install kong kong/ingress -n kong --values kic-to-konnect-ingresscontroller-and-gw-helm-chart.yaml
 ```
 ### Now add the echo and nginx deployments and services
