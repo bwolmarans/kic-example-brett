@@ -83,8 +83,9 @@ k delete ns nginx
 When we do this, it will actually create another LoadBalancer service on 192.168.49.101, in my examples below, it uses 192.168.49.100 because I did not actually do the MetalLB method before capturing that output.
 
 ```
+( set env vars for your KONNECT cert and key TLS_CERT and TLS_KEY )
 k create ns kong
-kubectl create secret tls konnect-client-tls -n kong --cert=tls.crt --key=tls.key
+kubectl create secret tls konnect-client-tls -n kong --cert=<(echo "$TLS_CERT")   --key=<(echo "$TLS_KEY")
 helm repo add kong https://charts.konghq.com
 helm repo update
 helm install kong kong/ingress -n kong --values kic-to-konnect-ingresscontroller-and-gw-helm-chart.yaml
