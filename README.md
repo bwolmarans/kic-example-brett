@@ -146,14 +146,17 @@ nginx         nginx                                ClusterIP      10.96.176.190 
 ```
 curl 192.168.49.100
 ```
+
 ```
 {
   "message":"no Route matched with those values",
   "request_id":"01051e5d5aa7d823e361eb4bfd4fa35b"
 }
 ```
+
 ```
 curl 192.168.49.100/echo
+```
 ```
 Welcome, you are connected to node minikube.
 Running on Pod echo-79d4b9b8bc-mdlkx.
