@@ -118,6 +118,7 @@ kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/downloa
 ```
 ### Create an instance of a Gateway and a GatewayClass
 ```
+k create ns kong
 echo "
 apiVersion: v1
 kind: Namespace
@@ -170,6 +171,7 @@ helm repo update
 # Copy the helm chart from Konnect GUI itself by going to your KIC Gateway, clicking connect or dataplane noes, and selecting the Helm method
 # The helm chart below is an example only. 
 helm install kong kong/ingress -n kong --values kic-to-konnect-ingresscontroller-and-gw-helm-chart.yaml
+# could also try helm install kong kong/ingress -n kong -f - <<EOF (helm chart) EOF
 ```
 ### Now add the echo and nginx deployments and services
 ```
