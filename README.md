@@ -188,6 +188,7 @@ service/echo annotated
 for i in {1..10}; do curl 192.168.49.100/echo; done;
 ```
 ```
+```
 Welcome, you are connected to node minikube.
 Running on Pod echo-79d4b9b8bc-vh85x.
 In namespace kong.
