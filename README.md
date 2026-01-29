@@ -232,7 +232,8 @@ curl $PROXY_IP/nginx
 ```
 ## Rate Limit Plugin
 ```
-k apply -f create-rate-limit-plugin.yaml 
+# ensure this goes into the kong namespace 
+k apply -n kong -f create-rate-limit-plugin.yaml
 ```
 ```
 kongplugin.configuration.konghq.com/rate-limit-5-min created
