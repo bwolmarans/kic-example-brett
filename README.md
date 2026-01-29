@@ -112,10 +112,45 @@ k delete ns nginx
 
 ## Now add KIC (using "from GUI" instructions)
 When we do this, it will actually create another LoadBalancer service on 192.168.49.101, in my examples below, it uses 192.168.49.100 because I did not actually do the MetalLB method before capturing that output.
-
+### Install Gateway API CRD
 ```
-# set env vars for your KONNECT cert and key TLS_CERT and TLS_KEY 
+kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml
+```
+### Create an instance of a Gateway and a GatewayClass
+```
+echo "
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kong
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: kong
+  annotations:
+    konghq.com/gatewayclass-unmanaged: 'true'
+spec:
+  controllerName: konghq.com/kic-gateway-controller
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: kong
+spec:
+  gatewayClassName: kong
+  listeners:
+  - name: proxy
+    port: 80
+    protocol: HTTP
+    allowedRoutes:
+      namespaces:
+         from: All
+" | kubectl apply -n kong -f -
+```
+```
 k create ns kong
+# set env vars for your KONNECT cert and key TLS_CERT and TLS_KEY 
 # first export your Konnect cert and key to TLS_CERT and TLS_KEY env vars
 # you must enclose these in double quotes, must use multi-line do not concat the line, do not put backslashes at the end of lines or it does not work
 # example: 
@@ -143,7 +178,7 @@ k apply -f echo-deployment-and-service.yaml
 k create ns nginx
 k apply -f nginx-deployment-and-service.yaml
 ```
-### Now add the respective ingresses and check the services exist
+### Now add the respective ingresses (these contain the routes) and check the services exist
 ```
 k apply -f kic-ingress-for-echo.yaml
 k apply -f kic-ingress-for-nginx.yaml
@@ -162,7 +197,9 @@ nginx         nginx                                ClusterIP      10.96.176.190 
 ```
 ### Test
 ```
-curl 192.168.49.100
+export PROXY_IP=$(kubectl get svc --namespace kong kong-gateway-proxy -o jsonpath='{range .status.loadBalancer.ingress[0]}{@.ip}{@.hostname}{end}')
+echo $PROXY_IP
+curl $PROXY_IP
 ```
 
 ```
@@ -173,7 +210,7 @@ curl 192.168.49.100
 ```
 
 ```
-curl 192.168.49.100/echo
+curl $PROXY_IP/echo
 ```
 ```
 Welcome, you are connected to node minikube.
@@ -182,7 +219,7 @@ In namespace echo.
 With IP address 10.244.0.21.
 ```
 ```
-curl 192.168.49.100/nginx
+curl $PROXY_IP/nginx
 ```
 ```
 <!DOCTYPE html>
@@ -206,7 +243,7 @@ k annotate -n echo service echo konghq.com/plugins=rate-limit-5-min
 service/echo annotated
 ```
 ```
-for i in {1..10}; do curl 192.168.49.100/echo; done;
+for i in {1..10}; do curl $PROXY_IP/echo; done;
 ```
 ```
 Welcome, you are connected to node minikube.
