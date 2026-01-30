@@ -33,12 +33,12 @@ minikube addons configure metallb
 ```
 ## Now with K3D
 ```
-# install k3d and test
+# install k3d and create a cluster WITHOUT traefik and WITHOUT serverlb
+k3d cluster create cluster1 --k3s-arg="--disable=traefik@server:*" --k3s-arg="--disable=serverlb@server:*"
 # install metallb generically
 kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.15.3/config/manifests/metallb-native.yaml
-k3d cluster create cluster1   --k3s-arg "--disable=servicelb@server:0"   --k3s-arg "--disable=traefik@server:0"
 docker network inspect k3d-cluster1 | grep Subnet
-# the metallb-address-pool-for-k3d.yaml should have the 172.18.x.x subnet
+# edit and modify the metallb-address-pool-for-k3d.yaml to have a range on the k3d subnet
 k apply -f metallb-address-pool-for-k3d.yaml 
 ```
 ### Now a simple NGINX service on NodePort
