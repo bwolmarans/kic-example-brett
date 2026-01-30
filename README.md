@@ -164,6 +164,7 @@ nginx         nginx                                ClusterIP      10.96.176.190 
 ```
 k describe ingress echo -n echo
 ```
+```
 Name:             echo
 Labels:           <none>
 Namespace:        echo
