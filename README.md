@@ -132,10 +132,9 @@ k create ns kong
 kubectl create secret tls konnect-client-tls -n kong --cert=<(echo "$TLS_CERT") --key=<(echo "$TLS_KEY")
 helm repo add kong https://charts.konghq.com
 helm repo update
-# Copy the helm chart from Konnect GUI itself by going to your KIC Gateway, clicking connect or dataplane noes, and selecting the Helm method
-# The helm chart below is an example only. 
-helm install kong kong/ingress -n kong --values kic-to-konnect-ingresscontroller-and-gw-helm-chart.yaml
-# could also try helm install kong kong/ingress -n kong -f - <<EOF (helm chart) EOF
+# The helm chart kic-to-konnect-ingresscontroller-and-gw-helm-chart.yaml is an example circa 1/30/2026 but take a look at it.
+# Copy the helm chart from Konnect GUI itself by going to your KIC Gateway, clicking connect or dataplane noes, and selecting the Helm method.  You may have to select the text and copy it instead of using copy widget.  This is so you don't accidently save a values.yaml in your working dir.
+helm install kong kong/ingress -n kong -f - <<EOF (paste entire helm chart) EOF
 ```
 ### Now add the echo and nginx deployments and services
 ```
@@ -161,6 +160,23 @@ kong          kong-gateway-admin                   ClusterIP      None          
 kong          kong-gateway-proxy                   LoadBalancer   10.103.8.238     192.168.49.100   80:31142/TCP,443:31781/TCP            6m42s
 kube-system   kube-dns                             ClusterIP      10.96.0.10       <none>           53/UDP,53/TCP,9153/TCP                5d16h
 nginx         nginx                                ClusterIP      10.96.176.190    <none>           8080/TCP                              4m52s
+```
+```
+k describe ingress echo -n echo
+```
+Name:             echo
+Labels:           <none>
+Namespace:        echo
+Address:          192.168.97.100
+Ingress Class:    kong
+Default backend:  <default>
+Rules:
+  Host        Path  Backends
+  ----        ----  --------
+  *           
+              /echo   echo:8080 (10.42.0.46:1027)
+Annotations:  konghq.com/strip-path: true
+Events:       <none>
 ```
 ### Test
 ```
@@ -198,7 +214,7 @@ curl $PROXY_IP/nginx
 ## Rate Limit Plugin
 ```
 # ensure this goes into the SAME namespace as the Service, so in this case, into the echo namespace
-k apply -n kong -f create-rate-limit-plugin.yaml -echo
+k apply -n echo -f create-rate-limit-plugin.yaml
 ```
 ```
 kongplugin.configuration.konghq.com/rate-limit-5-min created
@@ -210,6 +226,36 @@ k annotate -n echo service echo konghq.com/plugins=rate-limit-5-min
 ```
 service/echo annotated
 ```
+```
+k describe service echo -n echo
+```
+```
+Name:                     echo
+Namespace:                echo
+Labels:                   app=echo
+Annotations:              konghq.com/plugins: rate-limit-5-min
+Selector:                 app=echo
+Type:                     ClusterIP
+IP Family Policy:         SingleStack
+IP Families:              IPv4
+IP:                       10.43.69.188
+IPs:                      10.43.69.188
+Port:                     tcp  1025/TCP
+TargetPort:               1025/TCP
+Endpoints:                10.42.0.46:1025
+Port:                     udp  1026/TCP
+TargetPort:               1026/TCP
+Endpoints:                10.42.0.46:1026
+Port:                     http  8080/TCP
+TargetPort:               1027/TCP
+Endpoints:                10.42.0.46:1027
+Port:                     tls  1030/TCP
+TargetPort:               1030/TCP
+Endpoints:                10.42.0.46:1030
+Session Affinity:         None
+Internal Traffic Policy:  Cluster
+Events:                   <none>
+$ 
 ```
 for i in {1..10}; do curl $PROXY_IP/echo; done;
 ```
