@@ -6,8 +6,9 @@ Each service is in it's own namespace.  This also is part of onboarding.
 
 ## Tested with both Minikube and K3D
 ### With both, we use Metallb
+We will install k3d without traefik nor serverlb for consistency so we can use Metallb in either type of cluster
 ###
-### First, Minikube.  If using K3D look further down.
+### Minikube method.  If using K3D look further down. either/or
 ```
 minikube addons enable metallb
 ❗  metallb is a 3rd party addon and is not maintained or verified by minikube maintainers, enable at your own risk.
@@ -31,7 +32,7 @@ minikube addons configure metallb
 ✅  metallb was successfully configured
 
 ```
-## Now with K3D
+## K3D Method. Note installing without traefik nor serverlb
 ```
 # install k3d and create a cluster WITHOUT traefik and WITHOUT serverlb
 k3d cluster create cluster1 --k3s-arg="--disable=traefik@server:*" --k3s-arg="--disable=serverlb@server:*"
