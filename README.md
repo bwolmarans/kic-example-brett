@@ -113,43 +113,6 @@ k delete ns nginx
 
 ## Now add KIC (using "from GUI" instructions)
 When we do this, it will actually create another LoadBalancer service on 192.168.49.101, in my examples below, it uses 192.168.49.100 because I did not actually do the MetalLB method before capturing that output.
-### Install Gateway API CRD
-```
-kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml
-```
-### Create an instance of a Gateway and a GatewayClass
-```
-k create ns kong
-echo "
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: kong
----
-apiVersion: gateway.networking.k8s.io/v1
-kind: GatewayClass
-metadata:
-  name: kong
-  annotations:
-    konghq.com/gatewayclass-unmanaged: 'true'
-spec:
-  controllerName: konghq.com/kic-gateway-controller
----
-apiVersion: gateway.networking.k8s.io/v1
-kind: Gateway
-metadata:
-  name: kong
-spec:
-  gatewayClassName: kong
-  listeners:
-  - name: proxy
-    port: 80
-    protocol: HTTP
-    allowedRoutes:
-      namespaces:
-         from: All
-" | kubectl apply -n kong -f -
-```
 ```
 k create ns kong
 # set env vars for your KONNECT cert and key TLS_CERT and TLS_KEY 
@@ -183,7 +146,8 @@ k apply -f nginx-deployment-and-service.yaml
 ```
 ### Now add the respective ingresses (these contain the routes) and check the services exist
 ```
-k apply -f kic-ingress-for-echo.yaml
+# NOTE: Ingress rules must reside in the namespace where the app that they configure reside.
+k apply -f kic-ingress-for-echo.yaml -n echo
 k apply -f kic-ingress-for-nginx.yaml
 k get svc -A
 ```
@@ -233,8 +197,8 @@ curl $PROXY_IP/nginx
 ```
 ## Rate Limit Plugin
 ```
-# ensure this goes into the kong namespace 
-k apply -n kong -f create-rate-limit-plugin.yaml
+# ensure this goes into the SAME namespace as the Service, so in this case, into the echo namespace
+k apply -n kong -f create-rate-limit-plugin.yaml -echo
 ```
 ```
 kongplugin.configuration.konghq.com/rate-limit-5-min created
