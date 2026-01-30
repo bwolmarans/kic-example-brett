@@ -221,7 +221,7 @@ k apply -n echo -f create-rate-limit-plugin.yaml
 kongplugin.configuration.konghq.com/rate-limit-5-min created
 ```
 ```
-# note you must annote it using the ns of the service, so here it is scoped to ns echo
+# note you MUST annote it using the ns of the service, so here it is scoped to ns echo
 k annotate -n echo service echo konghq.com/plugins=rate-limit-5-min
 ```
 ```
