@@ -7,7 +7,7 @@ Each service is in it's own namespace.  This also is part of onboarding.
 ## Tested with both Minikube and K3D
 ### With both, we use Metallb
 ###
-### First, Metallb.  If using K3D look further down.
+### First, Minikube.  If using K3D look further down.
 ```
 minikube addons enable metallb
 ❗  metallb is a 3rd party addon and is not maintained or verified by minikube maintainers, enable at your own risk.
