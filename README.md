@@ -111,7 +111,7 @@ curl $PROXY_IP:8888
 k delete ns nginx
 ```
 
-## Now add KIC (using "from GUI" instructions)
+## Now add KIC (for this, must use Konnect GUI Helm instructions)
 When we do this, it will actually create another LoadBalancer service on 192.168.49.101, in my examples below, it uses 192.168.49.100 because I did not actually do the MetalLB method before capturing that output.
 ```
 k create ns kong
