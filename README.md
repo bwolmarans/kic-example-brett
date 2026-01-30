@@ -95,7 +95,8 @@ kube-system   kube-dns     ClusterIP      10.96.0.10       <none>           53/U
 nginx         nginx        LoadBalancer   10.103.120.235   192.168.49.100   8888:31720/TCP           9s
 ```
 ```
-curl 192.168.49.100:8888
+export PROXY_IP=$(kubectl get svc --namespace nginx nginx -o jsonpath='{range .status.loadBalancer.ingress[0]}{@.ip}{@.hostname}{end}')
+curl $PROXY_IP:8888
 ```
 ```
 <!DOCTYPE html>
